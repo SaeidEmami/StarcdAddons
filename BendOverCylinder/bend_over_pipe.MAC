@@ -1,0 +1,54 @@
+!! Name: bend_over_pipe.MAC
+!! What It Does: Transforms the selected nodes so that they bend over a pipe with outside radius R. This operation preserves the volume.
+!! Writer: Saeid Emami
+!!
+!! Assumptions:
+!!   Current Csys: A cartesian coordinate system at the center of the pipe with axis x along the pipe and axis z facing where the surface will touch pipe first
+!!   R: The radius of the pipe
+
+*define, noexe
+ofile, none
+batch on
+echo off
+
+*get, cs, icsys
+
+!! x1 = x0; y1 = z0 * sin(y0 / R); z1 = z0 * cos(y0 / R)
+*set, Rinv, 1 / R
+
+oper, getv, y, cs, 2
+oper, getv, z, cs, 3
+
+oper, smul, Rinv, 2, 4
+oper, sine, 4, 5
+oper, cosi, 4, 6
+
+oper, mult, 3, 5, 2
+oper, mult, 3, 6, 3
+
+*get, n, nvset
+*set, i, 0
+
+:rep
+*set, i, i + 1
+*if, i, gt, n
+*goto dn
+*endif
+
+*get, v, vset, i
+*get, y1, post, 2, v
+*get, z1, post, 3, v
+
+vmod, v, , y1, z1
+
+*goto rep
+
+:dn
+
+ofile, screen
+*end
+*loop, 1, 1, 1
+
+oper, getc, area, 4
+summ, cset
+
