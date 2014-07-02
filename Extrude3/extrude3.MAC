@@ -1,0 +1,188 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!             MACRO exterude.MAC          !!!
+!!!      extrudes a layer of shells into    !!!
+!!!     a solid based on vertices           !!!
+!!!          in ss1, ss2 and ss3.           !!!
+!!!                                         !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+*define, noexe
+
+*set, csys, icur
+!vs = mxv !!to determine the start point vertix for extrusion
+
+!!!!!!!!!!!!!!!!!!!! ORDERING VSET ACCORDING TO COORDINATE for SS1!!!!!!!!!!!!!!!!!!!!!!!
+rs1 $ r $ *set, mxv1, mxv
+!!set a starting point
+*set, v0, vx
+*set, vs, mxv
+! while N(vset) > 0
+:rp1
+*get, vend, nvset
+*if, vend, le, 0 $ *goto dn1 $ *endif
+! vmin = vset(1)
+! fmin = dist(vmin, v0)
+*get, v1, vset, 1
+*set, vmin, v1
+*get, fmin, distance, vmin, v0
+
+! for c1 = 1 to N(vset)
+! if distance(c1 , v0) <= f1: vmin = vset(c1)
+*set, c1, 1
+*get, vend, nvset
+:rp2
+*set, c1, c1 + 1
+*if, c1, gt, vend
+*goto dn2
+*endif
+*get, v1, vset, c1
+*get, ft, distance, v1, v0
+*if, ft, lt, fmin
+*set, fmin, ft
+*set, vmin, v1
+*endif
+*goto rp2
+:dn2
+!copy(vmin)
+!vset, del(vmin)
+*get, x, x, vmin $ *get, y, y, vmin $ *get, z, z, vmin
+v, mxv, x, y, z
+vset, dele, vlist, vmin
+*goto rp1
+:dn1
+!!
+!!!!!!!!!!!!!!!!!!!! ORDERING VSET ACCORDING TO COORDINATE for SS2!!!!!!!!!!!!!!!!!!!!!!!
+rs2 $ r $*set, mxv2, mxv
+!*set, v0, vx
+*set, vs, mxv
+! while N(vset) > 0
+:rp1
+*get, vend, nvset
+*if, vend, le, 0 $ *goto dn1 $ *endif
+! vmin = vset(1)
+! fmin = dist(vmin, v0)
+*get, v1, vset, 1
+*set, vmin, v1
+*get, fmin, distance, vmin, v0
+
+! for c1 = 1 to N(vset)
+! if distance(c1 , v0) <= f1: vmin = vset(c1)
+*set, c1, 1
+*get, vend, nvset
+:rp2
+*set, c1, c1 + 1
+*if, c1, gt, vend
+*goto dn2
+*endif
+*get, v1, vset, c1
+*get, ft, distance, v1, v0
+*if, ft, lt, fmin
+*set, fmin, ft
+*set, vmin, v1
+*endif
+*goto rp2
+:dn2
+!copy(vmin)
+!vset, del(vmin)
+*get, x, x, vmin $ *get, y, y, vmin $ *get, z, z, vmin
+v, mxv, x, y, z
+vset, dele, vlist, vmin
+*goto rp1
+:dn1
+!!
+!!!!!!!!!!!!!!!!!!!! ORDERING VSET ACCORDING TO COORDINATE for SS3!!!!!!!!!!!!!!!!!!!!!!!
+rs3 $ r $*set, mxv3, mxv
+!*set, v0, vx
+*set, vs, mxv
+! while N(vset) > 0
+:rp1
+*get, vend, nvset
+*if, vend, le, 0 $ *goto dn1 $ *endif
+! vmin = vset(1)
+! fmin = dist(vmin, v0)
+*get, v1, vset, 1
+*set, vmin, v1
+*get, fmin, distance, vmin, v0
+
+! for c1 = 1 to N(vset)
+! if distance(c1 , v0) <= f1: vmin = vset(c1)
+*set, c1, 1
+*get, vend, nvset
+:rp2
+*set, c1, c1 + 1
+*if, c1, gt, vend
+*goto dn2
+*endif
+*get, v1, vset, c1
+*get, ft, distance, v1, v0
+*if, ft, lt, fmin
+*set, fmin, ft
+*set, vmin, v1
+*endif
+*goto rp2
+:dn2
+!copy(vmin)
+!vset, del(vmin)
+*get, x, x, vmin $ *get, y, y, vmin $ *get, z, z, vmin
+v, mxv, x, y, z
+vset, dele, vlist, vmin
+*goto rp1
+:dn1
+!!
+!!!!!!!!!!!!!!!!!!!! EXTRUSION !!!!!!!!!!!!!!!!!!!!!!!
+batch, on
+!v1 = 0
+!for i = 1 to mxv - vs: cgen & vcextrude for d
+!v1 = v2
+!v2 = vlist(vs + i)
+!d = vd(v2 - v1)
+csys, csys
+*set, v1, mxv1 $ *set, v2, mxv2 $ *set, v3, mxv3
+*get, x12, x, v1 $ *get, y12, y, v1 $ *get, z12, z, v1
+*get, x22, x, v2 $ *get, y22, y, v2 $ *get, z22, z, v2
+*get, x32, x, v3 $ *get, y32, y, v3 $ *get, z32, z, v3
+*set, ve1, mxv2 $ *set, ve2, mxv3 $ *set, ve3, mxv
+
+:rep
+*set, v1, v1 + 1 $ *if, v1, ge, ve1 $ *goto dn3 $ *endif
+*set, v2, v2 + 1 $ *if, v2, ge, ve2 $ *goto dn3 $ *endif
+*set, v3, v3 + 1 $ *if, v3, ge, ve3 $ *goto dn3 $ *endif
+csys, csys
+*set, x11, x12 $ *set, y11, y12 $ *set, z11, z12
+*set, x21, x22 $ *set, y21, y22 $ *set, z21, z22
+*set, x31, x32 $ *set, y31, y32 $ *set, z31, z32
+*get, x12, x, v1 $ *get, y12, y, v1 $ *get, z12, z, v1
+*get, x22, x, v2 $ *get, y22, y, v2 $ *get, z22, z, v2
+*get, x32, x, v3 $ *get, y32, y, v3 $ *get, z32, z, v3
+
+!!shell type of typ1 is extruded to solid typ2
+*set, typ1, 80 $ *set, typ2, 81
+cnt, typ1  
+ctype, typ2  
+vnc $ off
+csys, csys
+vcextrude, 1, off, cset, , , local, x12 - x11, y12 - y11, z12 - z11, both, uniform
+cnt, typ1 $ ss5
+vnc$ off
+cgen, 2, off, cset, , , vgen, csys, x12 - x11, y12 - y11, z12 - z11
+rs5 $ cdel, cset 
+cnt, typ1 $ cat typ2 $ vnc $ merge
+
+
+vlocal, 50, cart, v1 - 1, x, v2 - 1, y, v3 - 1
+vlocal, 51, cart, v1, x, v2, y, v3
+cnt, typ1 $ vnc 
+csys, 51 $ vmod, vset, , , 0
+
+*get, dx1, dist, v1 - 1, v2 - 1 $ *get, dx2, dist, v1, v2 $ *set, rx, dx1 / dx2 
+*get, dy1, dist, v1 - 1, v3 - 1 $ *get, dy2, dist, v1, v3 $ *set, ry, dy1 / dy2
+csys, 51 $ vscale, vset, , , rx, ry
+
+vcompress, all
+
+*goto rep
+
+:dn3
+!!
+*end
+*loop, 1, 1, 1

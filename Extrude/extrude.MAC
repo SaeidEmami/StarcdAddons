@@ -1,0 +1,104 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!             MACRO exterude.MAC          !!!
+!!!      extrudes a layer of shells into    !!!
+!!!     a solid based on vertices in vset.  !!!
+!!!                                         !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+*define, noexe
+
+*set, v0, vx !!set a starting point
+
+!vs = mxv !!to determine the start point vertix for extrusion
+*set, vs, mxv
+
+!!!!!!!!!!!!!!!!!!!! ORDERING VSET ACCORDING TO COORDINATE !!!!!!!!!!!!!!!!!!!!!!!
+! while N(vset) > 0
+:rp1
+*get, vend, nvset
+*if, vend, le, 0:
+*goto dn1
+*endif
+
+! vmin = vset(1)
+! f1 = x(1) + y(1) + z(1)
+*get, v1, vset, 1
+*set, vmin, v1
+*get, fmin, distance, vmin, v0
+
+! for c1 = 1 to N(vset)
+! if x(c1) + y(c1) + z(c1) <= f1: vmin = vset(c1)
+*set, c1, 1
+*get, vend, nvset
+:rp2
+*set, c1, c1 + 1
+*if, c1, gt, vend
+*goto dn2
+*endif
+*get, v1, vset, c1
+*get, ft, distance, v1, v0
+*if, ft, lt, fmin
+*set, fmin, ft
+*set, vmin, v1
+*endif
+*goto rp2
+:dn2
+!!
+
+!copy(vmin)
+!vset, del(vmin)
+*get, x, x, vmin
+*get, y, y, vmin
+*get, z, z, vmin
+v, mxv, x, y, z
+vset, dele, vlist, vmin
+*goto rp1
+:dn1
+!!
+batch, on
+!!!!!!!!!!!!!!!!!!!! EXTRUSION !!!!!!!!!!!!!!!!!!!!!!!
+!v1 = 0
+!for i = 1 to mxv - vs: cgen & vcextrude for d
+!v1 = v2
+!v2 = vlist(vs + i)
+!d = vd(v2 - v1)
+*get, x2, x, vs
+*get, y2, y, vs
+*get, z2, z, vs
+*set, c, vs
+*set, ve, mxv
+:rep
+*set, c, c + 1
+*if, c, ge, ve
+*goto dn3
+*endif
+*set, x1, x2
+*set, y1, y2
+*set, z1, z2
+*get, x2, x, c
+*get, y2, y, c
+*get, z2, z, c
+
+!!shell type of typ1 is extruded to solid typ2 and typ3 is a temporary shell type
+*set, typ1, 5000 $ *set, typ2, 5001 $ *set, typ3, 5002
+cnt, typ1  
+ctype, typ2  
+vnc $ off 
+vcextrude, 1, off, cset, , , local, x2 - x1, y2 - y1, z2 - z1, both, uniform
+cnt, typ1
+vnc$ off 
+cgen, 2, off, cset, , , vgen, icur, x2 - x1, y2 - y1, z2 - z1
+ctype, typ3 
+cnt, typ1 $ cmod, cset
+vnc$ cnt, typ2 $ vdc $cset, newset, vset, all
+ctype, typ1 $ cmod, cset
+cnt, typ2 $ vnc $ merge $ vset none
+
+vcompress, all
+
+*goto rep
+
+:dn3
+!!
+*end
+*loop, 1, 1, 1
